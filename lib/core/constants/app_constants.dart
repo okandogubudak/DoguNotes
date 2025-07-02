@@ -49,32 +49,32 @@ class AppConstants {
   static const Map<String, Map<String, dynamic>> noteCategories = {
     'Genel': {
       'icon': '📝',
-      'color': '#64B5F6', // Light Blue
+      'color': '#3B82F6', // Blue (standard palette)
       'name': 'Genel',
     },
     'İş': {
       'icon': '💼',
-      'color': '#FF5722', // Deep Orange
+      'color': '#F97316', // Orange
       'name': 'İş',
     },
     'Önemli': {
       'icon': '⭐',
-      'color': '#FFC107', // Amber
+      'color': '#FACC15', // Yellow
       'name': 'Önemli',
     },
     'Şifreler': {
       'icon': '🔑',
-      'color': '#4CAF50', // Green
+      'color': '#22C55E', // Green
       'name': 'Şifreler',
     },
     'Kişisel': {
       'icon': '👤',
-      'color': '#9C27B0', // Purple
+      'color': '#EC4899', // Pink
       'name': 'Kişisel',
     },
     'Sağlık': {
       'icon': '🏥',
-      'color': '#E91E63', // Pink
+      'color': '#14B8A6', // Teal
       'name': 'Sağlık',
     },
   };

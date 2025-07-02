@@ -249,6 +249,7 @@ class _NoteViewScreenState extends State<NoteViewScreen>
         ),
         onPressed: () => Navigator.of(context).pop(),
       ),
+      centerTitle: true,
       title: Text(
         'Not Görüntüle',
         style: TextStyle(

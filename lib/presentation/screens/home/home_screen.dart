@@ -12,6 +12,7 @@ import '../note/note_view_screen.dart';
 import '../settings/settings_screen.dart';
 import '../archive/archive_screen.dart';
 import '../../../core/services/category_service.dart';
+import '../settings/category_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -294,22 +295,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
       actions: [
-        IconButton(
-          icon: Icon(
-            _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-            color: _isGridView
-                ? const Color(0xFF3B82F6)
-                : (isDarkMode ? Colors.white : const Color(0xFF334155)),
-            size: 24,
-          ),
-          tooltip: _isGridView ? 'Liste Görünümü' : 'Izgara Görünümü',
-          onPressed: () {
-            setState(() {
-              _isGridView = !_isGridView;
-            });
-          },
-        ),
-        const SizedBox(width: 8),
+        _buildViewToggle(isDarkMode),
+        const SizedBox(width: 16),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
@@ -334,8 +321,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           end: Alignment.bottomRight,
         ),
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(0),
         ),
         boxShadow: [
           BoxShadow(
@@ -349,8 +336,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(0),
         ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
@@ -364,21 +351,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ? Colors.white.withOpacity(0.06)
                         : Colors.white.withOpacity(0.85),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDarkMode
-                          ? const Color(0xFF334155)
-                          : const Color(0xFFE2E8F0),
-                      width: 1.1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDarkMode
-                            ? Colors.black.withOpacity(0.10)
-                            : Colors.blueGrey.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -471,14 +443,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            height: 90,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            height: 54,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
-              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -487,24 +456,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        icon,
-                        color: color,
-                        size: 16,
-                      ),
+                    Icon(
+                      icon,
+                      color: color,
+                      size: 14,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         label,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
@@ -515,11 +477,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-                const Spacer(),
+                const SizedBox(height: 4),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
                   ),
@@ -582,6 +544,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               : isDarkMode
                                   ? const Color(0xFF94A3B8)
                                   : const Color(0xFF64748B),
+                          fontFamily: Provider.of<ThemeProvider>(context, listen:false).currentFontFamily,
                         ),
                         child: Text(categoryKey),
                       ),
@@ -800,10 +763,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             gradient: cardGradient,
             borderRadius: borderRadius,
             boxShadow: cardShadow,
-            border: Border.all(
-              color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              width: 1.1,
-            ),
           ),
           child: ClipRRect(
             borderRadius: borderRadius,
@@ -970,7 +929,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
+
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1004,7 +963,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const Divider(),
 
-          // Tema, Ayarlar, Çıkış ikonları tek satır
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -1069,6 +1027,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDrawerIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool isDarkMode,
+  }) {
+    return IconButton(
+      icon: Icon(icon, color: isDarkMode ? Colors.white : const Color(0xFF475569), size: 24),
+      splashRadius: 24,
+      onPressed: onTap,
     );
   }
 
@@ -1188,21 +1158,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         pageBuilder: (context, animation, secondaryAnimation) => 
             const SettingsScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
           return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              )),
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.92, end: 1.0).animate(curved),
               child: child,
             ),
           );
         },
-        transitionDuration: const Duration(milliseconds: 300),
+        transitionDuration: const Duration(milliseconds: 280),
       ),
     );
   }
@@ -1270,18 +1235,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showLogoutDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Uygulamadan Çık'),
-          content: const Text('Uygulamadan çıkmak istediğinize emin misiniz?'),
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          title: Center(
+            child: Text(
+              'Uygulamadan Çık',
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          content: Text(
+            'Uygulamadan çıkmak istediğinize emin misiniz?',
+            style: TextStyle(
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155),
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('İptal'),
             ),
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+              ),
               onPressed: () {
                 SystemNavigator.pop();
               },
@@ -1293,15 +1277,64 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildDrawerIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required bool isDarkMode,
-  }) {
-    return IconButton(
-      icon: Icon(icon, color: isDarkMode ? Colors.white : const Color(0xFF475569), size: 24),
-      splashRadius: 24,
-      onPressed: onTap,
+  /// Modern segment kontrolü – Izgara vs Liste
+  Widget _buildViewToggle(bool isDarkMode) {
+    const double itemSize = 34;
+
+    Color _iconColor(bool selected) {
+      return selected
+          ? const Color(0xFF3B82F6)
+          : (isDarkMode ? Colors.white : const Color(0xFF334155));
+    }
+
+    Widget _buildItem(IconData icon, bool gridMode) {
+      final bool isSelected = gridMode ? _isGridView : !_isGridView;
+      return GestureDetector(
+        onTap: () {
+          if (isSelected) return;
+          setState(() {
+            _isGridView = gridMode;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: itemSize,
+          height: itemSize,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF3B82F6).withOpacity(0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: _iconColor(isSelected), size: 20),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          if (!isDarkMode)
+            BoxShadow(
+              color: Colors.blueGrey.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildItem(Icons.grid_view_rounded, true),
+          _buildItem(Icons.view_list_rounded, false),
+        ],
+      ),
     );
   }
 } 

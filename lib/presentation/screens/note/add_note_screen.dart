@@ -17,6 +17,7 @@ import '../../../core/services/media_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:audioplayers/audioplayers.dart';
+import '../settings/category_management_screen.dart';
 
 class AddNoteScreen extends StatefulWidget {
   final NoteModel? noteToEdit;
@@ -472,6 +473,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
         ),
         textInputAction: TextInputAction.next,
         onSubmitted: (_) => _contentFocus.requestFocus(),
+        textCapitalization: TextCapitalization.words,
       ),
     );
   }
@@ -514,6 +516,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
         maxLines: 10,
         minLines: 6,
         textInputAction: TextInputAction.newline,
+        textCapitalization: TextCapitalization.sentences,
       ),
     );
   }
@@ -534,109 +537,83 @@ class _AddNoteScreenState extends State<AddNoteScreen>
         const SizedBox(height: 12),
         
         if (_categoriesLoaded) ...[
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ..._categories.keys.map((category) {
-                final isSelected = category == _selectedCategory;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedCategory = category;
-                        final data = _categories[category];
-                        if (data != null && data['color'] != null) {
-                          if (data['color'] is int) {
-                            _selectedColor = '#${(data['color'] as int).toRadixString(16).substring(2).toUpperCase()}';
-                          } else if (data['color'] is String) {
-                            _selectedColor = data['color'];
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ..._categories.keys.map((category) {
+                  final isSelected = category == _selectedCategory;
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory = category;
+                          final data = _categories[category];
+                          if (data != null && data['color'] != null) {
+                            if (data['color'] is int) {
+                              _selectedColor = '#${(data['color'] as int).toRadixString(16).substring(2).toUpperCase()}';
+                            } else if (data['color'] is String) {
+                              _selectedColor = data['color'];
+                            }
                           }
-                        }
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? const Color(0xFF3B82F6)
-                            : isDarkMode 
-                                ? const Color(0xFF1E293B) 
-                                : Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
                           color: isSelected 
                               ? const Color(0xFF3B82F6)
                               : isDarkMode 
-                                  ? const Color(0xFF334155) 
-                                  : const Color(0xFFE2E8F0),
+                                  ? const Color(0xFF1E293B) 
+                                  : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected 
+                                ? const Color(0xFF3B82F6)
+                                : isDarkMode 
+                                    ? const Color(0xFF334155) 
+                                    : const Color(0xFFE2E8F0),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected 
-                              ? Colors.white
-                              : isDarkMode 
-                                  ? const Color(0xFF94A3B8) 
-                                  : const Color(0xFF64748B),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              // + butonu - son sırada
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _showAddCategoryDialog,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDarkMode 
-                          ? const Color(0xFF1E293B) 
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFF10B981),
-                        width: 2,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.add_rounded,
-                          color: Color(0xFF10B981),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Yeni',
+                        child: Text(
+                          category,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF10B981),
+                            color: isSelected 
+                                ? Colors.white
+                                : isDarkMode 
+                                    ? const Color(0xFF94A3B8) 
+                                    : const Color(0xFF64748B),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ],
+                  );
+                }),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(40),
+              backgroundColor: const Color(0xFF3B82F6),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CategoryManagementScreen()),
+              );
+            },
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Yeni Kategori'),
           ),
         ] else ...[
           Container(

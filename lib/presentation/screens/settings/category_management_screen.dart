@@ -20,18 +20,20 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
   bool _isLoading = true;
   bool _isEditMode = false;
   
-  // Standart renkler
+  // Benzersiz ve ölçekli 18 renk
   final List<Color> _standardColors = [
-    const Color(0xFF3B82F6), // Mavi
-    const Color(0xFF10B981), // Yeşil
-    const Color(0xFFEF4444), // Kırmızı
-    const Color(0xFFF59E0B), // Sarı
-    const Color(0xFF8B5CF6), // Mor
-    const Color(0xFFEC4899), // Pembe
+    const Color(0xFF3B82F6), // Blue
     const Color(0xFF06B6D4), // Cyan
+    const Color(0xFF14B8A6), // Teal
+    const Color(0xFF22C55E), // Green
     const Color(0xFF84CC16), // Lime
-    const Color(0xFFF97316), // Turuncu
-    const Color(0xFF6B7280), // Gri
+    const Color(0xFFFACC15), // Yellow
+    const Color(0xFFF97316), // Orange
+    const Color(0xFFEF4444), // Red
+    const Color(0xFFF43F5E), // Rose
+    const Color(0xFFEC4899), // Pink
+    const Color(0xFF8B5CF6), // Purple
+    const Color(0xFF6366F1), // Indigo
   ];
 
   @override
@@ -91,47 +93,50 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  // Header Stats
-                  Container(
-                    margin: const EdgeInsets.all(20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  // Header / Info Card
+                  Builder(builder: (context) {
+                    // Renk istatistikleri
+                    final usedColorCount = _categories.values.map<int>((data) {
+                      dynamic c = data['color'];
+                      int val;
+                      if (c is int) {
+                        val = c;
+                      } else if (c is String) {
+                        try {
+                          final formatted = c.startsWith('#') ? '0xff${c.substring(1)}' : c;
+                          val = int.parse(formatted);
+                        } catch (_) {
+                          val = 0;
+                        }
+                      } else {
+                        val = 0;
+                      }
+                      return val;
+                    }).toSet().length;
+                    final remainingColors = _standardColors.length - usedColorCount;
+
+                    return Container(
+                      margin: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDarkMode ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDarkMode 
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF10B981), Color(0xFF059669)],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.category_rounded,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
                                 'Kategoriler',
@@ -143,36 +148,35 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${_categories.length} kategori',
+                                '${_categories.length}/${_standardColors.length} kategori kullanılıyor',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: isDarkMode 
-                                      ? const Color(0xFF94A3B8) 
-                                      : const Color(0xFF64748B),
+                                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          onPressed: _showAddCategoryDialog,
-                          style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(42),
+                              backgroundColor: const Color(0xFF3B82F6),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
+                            onPressed: _showAddCategoryDialog,
+                            icon: const Icon(Icons.add_rounded),
+                            label: const Text('Kategori Ekle'),
                           ),
-                          icon: const Icon(Icons.add_rounded),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                  }),
                   
                   // Düzenleme modu bilgisi
                   if (_isEditMode)
                     Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: const Color(0xFF3B82F6).withOpacity(0.1),
@@ -238,30 +242,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         ),
       ),
       actions: [
-        if (_categories.isNotEmpty)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.edit_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              Transform.scale(
-                scale: 0.8,
-                child: Switch(
-                  value: _isEditMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _isEditMode = value;
-                    });
-                  },
-                  activeColor: const Color(0xFF3B82F6),
-                ),
-              ),
-            ],
-          ),
-        const SizedBox(width: 8),
+        if (_categories.isNotEmpty) _buildEditToggle(isDarkMode),
+        const SizedBox(width: 12),
       ],
     );
   }
@@ -436,7 +418,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         }
       }
     }
-    Color selectedColor = Color(colorValue);
+    Color? selectedColor = name == null ? null : Color(colorValue);
     
     // Güvenli icon parse etme
     int iconValue = Icons.folder.codePoint;
@@ -457,8 +439,10 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
+          final bool isDark = Theme.of(context).brightness == Brightness.dark;
           return AlertDialog(
-            title: Text(name == null ? 'Kategori Ekle' : 'Kategori Düzenle'),
+            backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+            title: Center(child: Text(name == null ? 'Kategori Ekle' : 'Kategori Düzenle')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,34 +469,69 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
                   spacing: 8,
                   runSpacing: 8,
                   children: _standardColors.map((color) {
-                    final isSelected = selectedColor.value == color.value;
+                    final bool isSelected = selectedColor?.value == color.value;
+                    // Renk başka bir kategoride kullanılıyor mu?
+                    final bool isUsed = _categories.entries.any((entry) {
+                      if (name != null && entry.key == name) {
+                        // Düzenleme modunda mevcut kategori rengini seçilebilir bırak
+                        return false;
+                      }
+                      final dynamic c = entry.value['color'];
+                      if (c is int) {
+                        return c == color.value;
+                      } else if (c is String) {
+                        try {
+                          final String hexString = c;
+                          final formatted = hexString.startsWith('#') ? '0xff${hexString.substring(1)}' : hexString;
+                          return int.parse(formatted) == color.value;
+                        } catch (_) {
+                          return false;
+                        }
+                      }
+                      return false;
+                    });
+
                     return GestureDetector(
-                      onTap: () {
-                        setDialogState(() {
-                          selectedColor = color;
-                        });
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected ? Colors.black : Colors.grey.withOpacity(0.3),
-                            width: isSelected ? 3 : 1,
-                          ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: color.withOpacity(0.4),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                      onTap: isUsed
+                          ? null
+                          : () {
+                              setDialogState(() {
+                                selectedColor = color;
+                              });
+                            },
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? Colors.black : Colors.grey.withOpacity(0.3),
+                                width: isSelected ? 3 : 1,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: color.withOpacity(0.4),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
                             ),
-                          ] : null,
-                        ),
-                        child: isSelected 
-                            ? const Icon(Icons.check, color: Colors.white, size: 20)
-                            : null,
+                            child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
+                          ),
+                          if (isUsed && !isSelected)
+                            Positioned.fill(
+                              child: Center(
+                                child: Icon(Icons.block, color: Colors.white, size: 22, shadows: [
+                                  Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 4),
+                                ]),
+                              ),
+                            ),
+                        ],
                       ),
                     );
                   }).toList(),
@@ -525,19 +544,19 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
                 child: const Text('İptal'),
               ),
               TextButton(
-                onPressed: () async {
-                  if (nameController.text.trim().isNotEmpty) {
-                    await _saveCategory(
-                      nameController.text.trim(),
-                      '', // Açıklama boş
-                      selectedColor,
-                      selectedIcon,
-                      isEditing: name != null,
-                      oldName: name,
-                    );
-                    if (mounted) Navigator.pop(context);
-                  }
-                },
+                onPressed: (nameController.text.trim().isNotEmpty && selectedColor != null)
+                    ? () async {
+                        await _saveCategory(
+                          nameController.text.trim(),
+                          '',
+                          selectedColor!,
+                          selectedIcon,
+                          isEditing: name != null,
+                          oldName: name,
+                        );
+                        if (mounted) Navigator.pop(context);
+                      }
+                    : null,
                 child: Text(name == null ? 'Ekle' : 'Güncelle'),
               ),
             ],
@@ -884,6 +903,41 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
                 onPressed: () => _showDeleteConfirmation(name),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Modern toggle for edit mode
+  Widget _buildEditToggle(bool isDarkMode) {
+    const double itemSize = 30;
+
+    Color _iconColor(bool active) => active
+        ? const Color(0xFF3B82F6)
+        : (isDarkMode ? Colors.white : const Color(0xFF334155));
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isEditMode = !_isEditMode;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: _isEditMode
+              ? const Color(0xFF3B82F6).withOpacity(0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Icon(
+          _isEditMode ? Icons.edit_rounded : Icons.edit_off_rounded,
+          size: itemSize - 6,
+          color: _iconColor(_isEditMode),
         ),
       ),
     );
