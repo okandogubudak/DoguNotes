@@ -688,7 +688,7 @@ class ExportService {
                 ],
               ),
             );
-          }).toList(),
+          }),
           pw.SizedBox(height: 20),
         ],
         

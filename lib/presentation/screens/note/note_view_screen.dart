@@ -44,7 +44,7 @@ class _NoteViewScreenState extends State<NoteViewScreen>
   VideoPlayerController? _videoController;
   bool _isSpeaking = false;
   bool _isPlayingAudio = false;
-  bool _isPlayingVideo = false;
+  final bool _isPlayingVideo = false;
   
   Map<String, Map<String, dynamic>> _categories = {};
   bool _categoriesLoaded = false;

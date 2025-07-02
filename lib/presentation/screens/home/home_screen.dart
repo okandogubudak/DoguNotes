@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:ui';
 
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
   
-  bool _isSearchVisible = true;
+  bool _isSearchVisible = false;
   late AnimationController _searchAnimationController;
   late Animation<double> _searchAnimation;
   Map<String, Map<String, dynamic>> _categories = {};
@@ -151,6 +152,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
     
+    const Color gradientStart = Color(0xFF3B82F6);
+    const Color gradientEnd   = Color(0xFF1D4ED8);
+    
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: _buildProfessionalAppBar(theme, themeProvider, isDarkMode),
@@ -175,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     turns: _isSearchVisible ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
-                      _isSearchVisible ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      Icons.keyboard_arrow_down_rounded,
                       color: isDarkMode ? Colors.white : const Color(0xFF334155),
                       size: 28,
                     ),
@@ -318,18 +322,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
   
   Widget _buildProfessionalSearchSection(ThemeData theme, bool isDarkMode) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDarkMode
+              ? [const Color(0xFF232B3B).withOpacity(0.95), const Color(0xFF1E293B).withOpacity(0.85)]
+              : [const Color(0xFFF1F5FA).withOpacity(0.95), const Color(0xFFE3ECF7).withOpacity(0.85)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.18)
+                : Colors.blueGrey.withOpacity(0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
             child: Column(
               children: [
-          Container(
+                Container(
                   decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
+                    color: isDarkMode
+                        ? Colors.white.withOpacity(0.06)
+                        : Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                color: isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+                      color: isDarkMode
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
+                      width: 1.1,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDarkMode
+                            ? Colors.black.withOpacity(0.10)
+                            : Colors.blueGrey.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -341,16 +390,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     decoration: InputDecoration(
                       hintText: 'Notlarda ara...',
                       hintStyle: TextStyle(
-                        color: isDarkMode ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDarkMode ? const Color(0xFF7B8CA6) : const Color(0xFF7B8CA6),
+                        fontWeight: FontWeight.w400,
                       ),
                       prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: isDarkMode ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFF3B82F6),
+                        size: 26,
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
-                                Icons.clear_rounded,
+                                Icons.cancel_rounded,
                                 color: isDarkMode ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                               ),
                               onPressed: () {
@@ -360,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(16),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
                     ),
                     onChanged: _onSearchChanged,
                     onTap: () {
@@ -371,41 +422,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     },
                   ),
                 ),
-                
-          if (_searchController.text.isEmpty) ...[
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                _buildQuickStat(
-                  'Notlar',
-                  _getNotesCount().toString(),
-                  Icons.note_alt_outlined,
-                  const Color(0xFF3B82F6),
-                  isDarkMode,
-                  onTap: () => _resetToGeneralCategory(),
-                ),
-                const SizedBox(width: 12),
-                _buildQuickStat(
-                  'Arşiv',
-                  _getArchivedNotesCount().toString(),
-                  Icons.archive_rounded,
-                  const Color(0xFF10B981),
-                  isDarkMode,
-                  onTap: () => _navigateToArchive(),
-                ),
-                const SizedBox(width: 12),
-                _buildQuickStat(
-                  'Favoriler',
-                  _getFavoriteNotesCount().toString(),
-                  Icons.favorite_rounded,
-                  const Color(0xFFEF4444),
-                  isDarkMode,
-                  onTap: () => _filterFavorites(),
-                ),
+                if (_searchController.text.isEmpty) ...[
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      _buildQuickStat(
+                        'Notlar',
+                        _getNotesCount().toString(),
+                        Icons.sticky_note_2_rounded,
+                        const Color(0xFF3B82F6),
+                        isDarkMode,
+                        onTap: () => _resetToGeneralCategory(),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildQuickStat(
+                        'Arşiv',
+                        _getArchivedNotesCount().toString(),
+                        Icons.archive_outlined,
+                        const Color(0xFF10B981),
+                        isDarkMode,
+                        onTap: () => _navigateToArchive(),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildQuickStat(
+                        'Favoriler',
+                        _getFavoriteNotesCount().toString(),
+                        Icons.favorite_rounded,
+                        const Color(0xFFEF4444),
+                        isDarkMode,
+                        onTap: () => _filterFavorites(),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -491,6 +544,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           setState(() {
             _currentCategoryIndex = index;
           });
+
+          // Seçilen kategori sağlayıcıya bildir
+          final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+          if (_categoryKeys.isNotEmpty && index < _categoryKeys.length) {
+            notesProvider.setCategory(_categoryKeys[index]);
+          } else {
+            notesProvider.setCategory('Genel');
+          }
         },
         itemBuilder: (context, index) {
           final categoryKey = _categoryKeys[index];
@@ -633,270 +694,127 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildProfessionalNoteCard(note, ThemeData theme, bool isDarkMode) {
-    if (_isGridView) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _navigateToNoteView(note.id),
-          onLongPress: () => _showNoteOptions(note),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode 
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+    final cardGradient = LinearGradient(
+      colors: isDarkMode
+          ? [const Color(0xFF232B3B), const Color(0xFF1E293B)]
+          : [const Color(0xFFF1F5FA), const Color(0xFFE3ECF7)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    final cardShadow = [
+      BoxShadow(
+        color: isDarkMode
+            ? Colors.black.withOpacity(0.22)
+            : Colors.blueGrey.withOpacity(0.10),
+        blurRadius: 18,
+        offset: const Offset(0, 8),
+      ),
+    ];
+    final borderRadius = BorderRadius.circular(18);
+    Widget cardContent = Padding(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              if (note.isPinned)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(Icons.push_pin_rounded, size: 18, color: const Color(0xFF3B82F6)),
                 ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3B82F6).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          note.category,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3B82F6),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      if (note.isPinned)
-                        const Icon(
-                          Icons.push_pin_rounded,
-                          size: 14,
-                          color: Color(0xFFEF4444),
-                        ),
-                      if (note.isFavorite)
-                        const Icon(
-                          Icons.favorite_rounded,
-                          size: 14,
-                          color: Color(0xFFEF4444),
-                        ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  if (note.title.isNotEmpty)
-                    Text(
-                      note.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  
-                  if (note.title.isNotEmpty && note.content.isNotEmpty)
-                    const SizedBox(height: 8),
-                  
-                  if (note.content.isNotEmpty)
-                    Text(
-                      note.content,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                        height: 1.4,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  
-                  const Spacer(),
-                  
-                  Row(
-                    children: [
-                      Text(
-                        _formatDate(note.updatedAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                        ),
-                      ),
-                      const Spacer(),
-                      if (note.attachments.isNotEmpty)
-                        Icon(
-                          Icons.attach_file_rounded,
-                          size: 14,
-                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                        ),
-                      if (note.audioPath != null)
-                        Icon(
-                          Icons.mic_rounded,
-                          size: 14,
-                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                        ),
-                    ],
-                  ),
-                ],
+              if (note.isFavorite)
+                Icon(Icons.favorite_rounded, size: 18, color: const Color(0xFFEF4444)),
+            ],
+          ),
+          if (note.title.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 6),
+              child: Text(
+                note.title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
+            ),
+          if (note.content.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                note.content,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: isDarkMode ? const Color(0xFFB6C2D2) : const Color(0xFF64748B),
+                  height: 1.4,
+                ),
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          const Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (note.attachments.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Icon(Icons.attach_file_rounded, size: 16, color: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFF3B82F6)),
+                ),
+              if (note.audioPath != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Icon(Icons.mic_rounded, size: 16, color: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFF3B82F6)),
+                ),
+              Text(
+                _formatDate(note.updatedAt),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _navigateToNoteView(note.id),
+        onLongPress: () => _showNoteOptions(note),
+        borderRadius: borderRadius,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            gradient: cardGradient,
+            borderRadius: borderRadius,
+            boxShadow: cardShadow,
+            border: Border.all(
+              color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              width: 1.1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: borderRadius,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: cardContent,
             ),
           ),
         ),
-      );
-    } else {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _navigateToNoteView(note.id),
-          onLongPress: () => _showNoteOptions(note),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode 
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          if (note.title.isNotEmpty)
-                            Expanded(
-                              child: Text(
-                                note.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF3B82F6).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              note.category,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF3B82F6),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      if (note.content.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          note.content,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                            height: 1.4,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      
-                      const SizedBox(height: 8),
-                      
-                      Row(
-                        children: [
-                          Text(
-                            _formatDate(note.updatedAt),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          if (note.attachments.isNotEmpty)
-                            Icon(
-                              Icons.attach_file_rounded,
-                              size: 14,
-                              color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                            ),
-                          if (note.audioPath != null) ...[
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.mic_rounded,
-                              size: 14,
-                              color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                Column(
-                  children: [
-                    if (note.isPinned)
-                      const Icon(
-                        Icons.push_pin_rounded,
-                        size: 16,
-                        color: Color(0xFFEF4444),
-                      ),
-                    if (note.isFavorite) ...[
-                      if (note.isPinned) const SizedBox(height: 4),
-                      const Icon(
-                        Icons.favorite_rounded,
-                        size: 16,
-                        color: Color(0xFFEF4444),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   Widget _buildProfessionalEmptyState(ThemeData theme, bool isDarkMode, String category) {
@@ -954,11 +872,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildProfessionalCreateButton(ThemeData theme, bool isDarkMode) {
-    return FloatingActionButton(
-      onPressed: _navigateToAddNote,
-      backgroundColor: const Color(0xFF3B82F6),
-      elevation: 4,
-      child: const Icon(Icons.add_rounded, color: Colors.white),
+    const Color gradientStart = Color(0xFF3B82F6);
+    const Color gradientEnd   = Color(0xFF1D4ED8);
+
+    return GestureDetector(
+      onTap: _navigateToAddNote,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [gradientStart, gradientEnd],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: gradientStart.withOpacity(0.45),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(Icons.add_rounded, color: Colors.white, size: 30),
+        ),
+      ),
     );
   }
 

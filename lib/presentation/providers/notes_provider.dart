@@ -155,7 +155,7 @@ class NotesProvider extends ChangeNotifier {
           updatedAt: DateTime.now(),
         );
         
-        final result = await _databaseService.updateNote(updatedNote as NoteModel);
+        final result = await _databaseService.updateNote(updatedNote);
         if (result > 0) {
           _notes[noteIndex] = updatedNote;
           _applyFilters();
@@ -181,7 +181,7 @@ class NotesProvider extends ChangeNotifier {
           updatedAt: DateTime.now(),
         );
         
-        final result = await _databaseService.updateNote(updatedNote as NoteModel);
+        final result = await _databaseService.updateNote(updatedNote);
         if (result > 0) {
           _notes[noteIndex] = updatedNote;
           _applyFilters();
@@ -239,7 +239,7 @@ class NotesProvider extends ChangeNotifier {
           updatedAt: DateTime.now(),
         );
         
-        final result = await _databaseService.updateNote(updatedNote as NoteModel);
+        final result = await _databaseService.updateNote(updatedNote);
         if (result > 0) {
           _notes[noteIndex] = updatedNote;
           _applyFilters();
@@ -308,20 +308,26 @@ class NotesProvider extends ChangeNotifier {
           note.content.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
     }
 
-    // Sort by pinned first, then favorites, then updated date
-    filtered.sort((a, b) {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
+    // Sıralama mantığı
+    if (_selectedCategory == 'Genel') {
+      // Genel kategoride en yeni not (createdAt) her zaman üstte
+      filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else {
+      // Diğer kategorilerde: pin → favori → son güncelleme
+      filtered.sort((a, b) {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
 
-      if (a.isPinned && b.isPinned) {
-        return a.createdAt.compareTo(b.createdAt);
-      }
+        if (a.isPinned && b.isPinned) {
+          return a.createdAt.compareTo(b.createdAt);
+        }
 
-      if (a.isFavorite && !b.isFavorite) return -1;
-      if (!a.isFavorite && b.isFavorite) return 1;
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
 
-      return b.updatedAt.compareTo(a.updatedAt);
-    });
+        return b.updatedAt.compareTo(a.updatedAt);
+      });
+    }
 
     _filteredNotes = filtered;
   }
@@ -711,7 +717,7 @@ class NotesProvider extends ChangeNotifier {
         final archivedNote = note.copyWith(
           updatedAt: DateTime.now(),
           isArchived: true,
-        ) as NoteModel;
+        );
         
         final result = await _databaseService.updateNote(archivedNote);
         print('Database update result: $result');
@@ -742,7 +748,7 @@ class NotesProvider extends ChangeNotifier {
         final unarchivedNote = note.copyWith(
           updatedAt: DateTime.now(),
           isArchived: false,
-        ) as NoteModel;
+        );
         
         final result = await _databaseService.updateNote(unarchivedNote);
         if (result > 0) {
@@ -990,7 +996,7 @@ class NotesProvider extends ChangeNotifier {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
                 
                 // Audio info

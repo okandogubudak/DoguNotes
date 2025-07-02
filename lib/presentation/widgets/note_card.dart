@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/note_model.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/theme/app_theme.dart';
 import '../providers/theme_provider.dart';
 
 class NoteCard extends StatelessWidget {
@@ -36,7 +34,9 @@ class NoteCard extends StatelessWidget {
     return Hero(
       tag: 'note-${note.id}',
       child: Container(
-        margin: EdgeInsets.zero,
+        margin: isGridView
+            ? EdgeInsets.zero
+            : const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -62,6 +62,12 @@ class NoteCard extends StatelessWidget {
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
+                  BoxShadow(
+                    color: color.withOpacity(isDarkMode ? 0.6 : 0.4),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 0),
+                  ),
                 ],
               ),
               child: Padding(
@@ -70,58 +76,53 @@ class NoteCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Category and status row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              note.category,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (note.isPinned || note.isFavorite)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (note.isPinned)
-                                Icon(
-                                  Icons.push_pin,
-                                  size: 14,
-                                  color: Colors.orange,
-                                ),
-                              if (note.isPinned && note.isFavorite)
-                                const SizedBox(width: 4),
-                              if (note.isFavorite)
-                                Icon(
-                                  Icons.favorite,
-                                  size: 14,
-                                  color: Colors.red,
-                                ),
-                            ],
-                          ),
-                      ],
-                    ),
-                    
                     SizedBox(height: isGridView ? 8 : 12),
                     
-                    // Title
+                    // Title with centered alignment and icons on the right
                     if (note.title.isNotEmpty)
-                      Flexible(
-                        child: Text(
-                        note.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.white : theme.colorScheme.onSurface,
-                            fontSize: 14,
-                          ),
-                          maxLines: isGridView ? 1 : 2,
-                          overflow: TextOverflow.ellipsis,
+                      SizedBox(
+                        width: double.infinity,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Text(
+                                note.title,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isDarkMode ? Colors.white : theme.colorScheme.onSurface,
+                                  fontSize: 14,
+                                ),
+                                maxLines: isGridView ? 1 : 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (note.isPinned || note.isFavorite)
+                              Positioned(
+                                right: 0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (note.isPinned)
+                                      const Icon(
+                                        Icons.push_pin,
+                                        size: 14,
+                                        color: Colors.orange,
+                                      ),
+                                    if (note.isPinned && note.isFavorite)
+                                      const SizedBox(width: 4),
+                                    if (note.isFavorite)
+                                      const Icon(
+                                        Icons.favorite,
+                                        size: 14,
+                                        color: Colors.red,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     

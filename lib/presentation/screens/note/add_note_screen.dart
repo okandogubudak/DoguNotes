@@ -42,7 +42,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
   
   String _selectedCategory = 'Genel';
   final List<String> _attachments = [];
-  List<String> _audioPaths = [];
+  final List<String> _audioPaths = [];
   bool _isRecording = false;
   int? _playingIndex;
   AudioPlayer? _audioPlayer;
@@ -57,7 +57,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
   bool _categoriesLoaded = false;
   bool _isLoading = false;
   final SpeechToTextService _speechService = SpeechToTextService();
-  bool _isListening = false;
+  final bool _isListening = false;
 
   @override
   void initState() {
@@ -592,7 +592,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
                     ),
                   ),
                 );
-              }).toList(),
+              }),
               // + butonu - son sırada
               Material(
                 color: Colors.transparent,
@@ -1220,7 +1220,7 @@ class _AddNoteScreenState extends State<AddNoteScreen>
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

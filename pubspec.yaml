@@ -127,6 +127,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/fonts/
+    - assets/Fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -134,13 +135,83 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-    # Artık Open Sans Google Fonts kullanıyoruz, assets font'larına gerek yok
+  # Custom fonts for the application
+  fonts:
+    - family: ArialNova
+      fonts:
+        - asset: assets/Fonts/ArialNova.ttf
+        - asset: assets/Fonts/ArialNova-Bold.ttf
+          weight: 700
+        - asset: assets/Fonts/ArialNova-Italic.ttf
+          style: italic
+        - asset: assets/Fonts/ArialNova-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/Fonts/ArialNova-Light.ttf
+          weight: 300
+        - asset: assets/Fonts/ArialNova-LightItalic.ttf
+          weight: 300
+          style: italic
+
+    - family: ArialNovaCond
+      fonts:
+        - asset: assets/Fonts/ArialNovaCond.ttf
+        - asset: assets/Fonts/ArialNovaCond-Bold.ttf
+          weight: 700
+        - asset: assets/Fonts/ArialNovaCond-Italic.ttf
+          style: italic
+        - asset: assets/Fonts/ArialNovaCond-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/Fonts/ArialNovaCond-Light.ttf
+          weight: 300
+        - asset: assets/Fonts/ArialNovaCond-LightItalic.ttf
+          weight: 300
+          style: italic
+
+    - family: Lora
+      fonts:
+        - asset: assets/Fonts/Lora-VariableFont_wght.ttf
+        - asset: assets/Fonts/Lora-Italic-VariableFont_wght.ttf
+          style: italic
+
+    - family: RobotoSerif
+      fonts:
+        - asset: 'assets/Fonts/RobotoSerif-VariableFont_GRAD,opsz,wdth,wght.ttf'
+        - asset: 'assets/Fonts/RobotoSerif-Italic-VariableFont_GRAD,opsz,wdth,wght.ttf'
+          style: italic
+
+    - family: BuiltTitling
+      fonts:
+        - asset: 'assets/Fonts/built titling rg.ttf'
+        - asset: 'assets/Fonts/built titling bd.ttf'
+          weight: 700
+        - asset: 'assets/Fonts/built titling lt.ttf'
+          weight: 300
+
+    - family: AngillaTattoo
+      fonts:
+        - asset: 'assets/Fonts/AngillaTattoo_PERSONAL_USE_ONLY.ttf'
+
+    - family: Hemmet
+      fonts:
+        - asset: 'assets/Fonts/Hemmet_Personal_Use_Only.ttf'
+
+    - family: Painter
+      fonts:
+        - asset: 'assets/Fonts/Painter_PERSONAL_USE_ONLY.ttf'
+
+    - family: VeteranTypewriter
+      fonts:
+        - asset: 'assets/Fonts/veteran typewriter.ttf'
+
+    - family: SoftItalicTypewriter
+      fonts:
+        - asset: 'assets/Fonts/zai_SoftItalicTypewriter20.ttf'
+
+    - family: SpotlightTypewriter
+      fonts:
+        - asset: 'assets/Fonts/Spotlight Typewriter NC.ttf'
 
 # Flutter Launcher Icons Configuration
 flutter_launcher_icons:

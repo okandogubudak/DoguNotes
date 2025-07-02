@@ -543,7 +543,7 @@ class _AdvancedMediaWidgetState extends State<AdvancedMediaWidget> {
         child: Stack(
           children: [
             // Medya içeriği
-            Container(
+            SizedBox(
               width: 100,
               height: 100,
               child: _buildMediaContent(mediaPath),

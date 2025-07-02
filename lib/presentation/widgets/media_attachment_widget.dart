@@ -2,14 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:audioplayers/audioplayers.dart';
-import '../../core/constants/app_constants.dart';
 import 'full_screen_image_viewer.dart';
-import 'advanced_media_widget.dart';
 import 'package:video_player/video_player.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:dogunotes/presentation/widgets/full_screen_video_viewer.dart';
-import 'package:flutter/services.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:open_filex/open_filex.dart';
 

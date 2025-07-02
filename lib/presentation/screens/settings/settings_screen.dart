@@ -17,6 +17,7 @@ import 'category_management_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import '../auth/splash_screen.dart';
+import 'font_selection_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -43,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     permissions['Kamera'] = await _permissionService.isCameraPermissionGranted();
     permissions['Mikrofon'] = await _permissionService.isMicrophonePermissionGranted();
     permissions['Bildirimler'] = await _permissionService.isNotificationPermissionGranted();
+    permissions['Depolama'] = await _permissionService.isStoragePermissionGranted();
     
     setState(() {
       _permissions = permissions;
@@ -117,48 +119,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildProfessionalBody(bool isDarkMode) {
     return Container(
-      color: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: isDarkMode 
+              ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
+              : [const Color(0xFFF8FAFC), const Color(0xFFE2E8F0)],
+        ),
+      ),
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           // Güvenlik
           _buildSectionTitle('Güvenlik', Icons.security_rounded, isDarkMode),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildPinChangeCard(isDarkMode),
           
           const SizedBox(height: 32),
           
-          // Kategoriler
-          _buildSectionTitle('Kategoriler', Icons.category_rounded, isDarkMode),
-          const SizedBox(height: 12),
+          // Uygulama Tercihleri
+          _buildSectionTitle('Uygulama Tercihleri', Icons.tune_rounded, isDarkMode),
+          const SizedBox(height: 16),
           _buildCategoryManagementCard(isDarkMode),
+          const SizedBox(height: 12),
+          _buildFontSelectionCard(isDarkMode),
           
           const SizedBox(height: 32),
           
           // İzinler
           _buildSectionTitle('İzinler', Icons.admin_panel_settings_rounded, isDarkMode),
-          const SizedBox(height: 12),
-          _buildPermissionsCard(isDarkMode),
+          const SizedBox(height: 16),
+          _buildModernPermissionsCard(isDarkMode),
           
           const SizedBox(height: 32),
           
           // Veri Yönetimi
           _buildSectionTitle('Veri Yönetimi', Icons.storage_rounded, isDarkMode),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildDataManagementCards(isDarkMode),
           
           const SizedBox(height: 32),
           
           // İletişim
           _buildSectionTitle('İletişim', Icons.contact_support_rounded, isDarkMode),
-          const SizedBox(height: 12),
-          _buildContactCard(isDarkMode),
+          const SizedBox(height: 16),
+          _buildModernContactCard(isDarkMode),
           
           const SizedBox(height: 32),
           
           // Hakkında
           _buildSectionTitle('Hakkında', Icons.info_rounded, isDarkMode),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildAboutCards(isDarkMode),
           
           const SizedBox(height: 100),
@@ -168,23 +180,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSectionTitle(String title, IconData icon, bool isDarkMode) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: const Color(0xFF3B82F6),
-          size: 20,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF3B82F6),
+            size: 20,
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              height: 2,
+              margin: const EdgeInsets.only(bottom: 2),
+              color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -279,6 +304,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
       isDarkMode: isDarkMode,
+    );
+  }
+
+  Widget _buildFontSelectionCard(bool isDarkMode) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => FontSelectionScreen()),
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.font_download_rounded,
+                    color: Color(0xFF3B82F6),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Yazı Tipi',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Uygulama genel yazı tipini seç',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -436,7 +539,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               );
-            }).toList(),
+            }),
           ] else ...[
             Padding(
               padding: const EdgeInsets.all(16),
@@ -520,6 +623,203 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildModernPermissionsCard(bool isDarkMode) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDarkMode 
+              ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+              : [Colors.white, const Color(0xFFF8FAFC)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [const Color(0xFFF59E0B), const Color(0xFFD97706)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFF59E0B).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.admin_panel_settings_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Uygulama İzinleri',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Verilen izinleri görüntüle ve yönet',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Permissions List
+          if (_permissions.isNotEmpty) ...[
+            Container(
+              height: 1,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDarkMode 
+                      ? [Colors.transparent, const Color(0xFF334155), Colors.transparent]
+                      : [Colors.transparent, const Color(0xFFE2E8F0), Colors.transparent],
+                ),
+              ),
+            ),
+            ..._permissions.entries.map((entry) {
+              final isGranted = entry.value;
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isGranted 
+                      ? (isDarkMode ? const Color(0xFF059669).withOpacity(0.1) : const Color(0xFF10B981).withOpacity(0.05))
+                      : (isDarkMode ? const Color(0xFFDC2626).withOpacity(0.1) : const Color(0xFFEF4444).withOpacity(0.05)),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isGranted 
+                        ? (isDarkMode ? const Color(0xFF059669).withOpacity(0.3) : const Color(0xFF10B981).withOpacity(0.2))
+                        : (isDarkMode ? const Color(0xFFDC2626).withOpacity(0.3) : const Color(0xFFEF4444).withOpacity(0.2)),
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: isGranted ? null : () => _requestPermission(entry.key),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isGranted 
+                                  ? const Color(0xFF10B981).withOpacity(0.1)
+                                  : const Color(0xFFEF4444).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              _getPermissionIcon(entry.key),
+                              color: isGranted 
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.key,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isGranted ? 'İzin verildi' : 'İzin gerekli',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: isGranted 
+                                        ? const Color(0xFF10B981)
+                                        : const Color(0xFFEF4444),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isGranted)
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: Color(0xFF10B981),
+                              size: 20,
+                            )
+                          else
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 16,
+                              color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+            const SizedBox(height: 8),
+          ] else
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'İzinler yükleniyor...',
+                style: TextStyle(
+                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContactCard(bool isDarkMode) {
     return _buildActionCard(
       icon: Icons.email_rounded,
@@ -528,6 +828,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
       subtitle: 'okandogubudak@gmail.com',
       onTap: _openContactEmail,
       isDarkMode: isDarkMode,
+    );
+  }
+
+  Widget _buildModernContactCard(bool isDarkMode) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDarkMode 
+              ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+              : [Colors.white, const Color(0xFFF8FAFC)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _showContactOptions,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [const Color(0xFF10B981), const Color(0xFF059669)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.contact_support_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'İletişim',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Geliştirici ile iletişime geç',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withOpacity(0.2),
+                          ),
+                        ),
+                        child: Text(
+                          'okandogubudak@gmail.com',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF10B981),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -742,9 +1153,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Icons.camera_alt_rounded;
       case 'Mikrofon':
         return Icons.mic_rounded;
-
       case 'Bildirimler':
         return Icons.notifications_rounded;
+      case 'Depolama':
+        return Icons.storage_rounded;
       default:
         return Icons.security_rounded;
     }
@@ -928,9 +1340,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         case 'Mikrofon':
           status = await _permissionService.requestMicrophonePermission();
           break;
-
         case 'Bildirimler':
           status = await _permissionService.requestNotificationPermission();
+          break;
+        case 'Depolama':
+          status = await _permissionService.requestStoragePermission();
           break;
       }
       
@@ -947,6 +1361,154 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       _showSnackBar('İzin isteği sırasında hata oluştu: $e', isError: true);
     }
+  }
+
+  Future<void> _showContactOptions() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final themeProvider = Provider.of<ThemeProvider>(context);
+        final isDarkMode = themeProvider.isDarkMode;
+        
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDarkMode 
+                  ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+                  : [Colors.white, const Color(0xFFF8FAFC)],
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? const Color(0xFF64748B) : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'İletişim Seçenekleri',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildContactOption(
+                icon: Icons.email_rounded,
+                title: 'E-posta Gönder',
+                subtitle: 'Varsayılan mail uygulaması ile',
+                onTap: () {
+                  Navigator.pop(context);
+                  _openContactEmail();
+                },
+                isDarkMode: isDarkMode,
+              ),
+              const SizedBox(height: 12),
+              _buildContactOption(
+                icon: Icons.content_copy_rounded,
+                title: 'E-posta Adresini Kopyala',
+                subtitle: 'okandogubudak@gmail.com',
+                onTap: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(const ClipboardData(text: 'okandogubudak@gmail.com'));
+                  _showSnackBar('E-posta adresi kopyalandı');
+                },
+                isDarkMode: isDarkMode,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContactOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isDarkMode,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [const Color(0xFF10B981), const Color(0xFF059669)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showSnackBar(String message, {bool isError = false}) {

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/auth_service.dart';
 import '../../providers/theme_provider.dart';
 import 'login_screen.dart';
-import '../home/home_screen.dart';
 import 'pin_setup_screen.dart';
 
 class SplashScreen extends StatefulWidget {

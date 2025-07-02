@@ -274,7 +274,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         colorValue = data['color'];
       } else if (data['color'] is String) {
         try {
-          colorValue = int.parse(data['color']);
+          final String hexString = data['color'] as String;
+          final formatted = hexString.startsWith('#')
+              ? '0xff${hexString.substring(1)}'
+              : hexString;
+          colorValue = int.parse(formatted);
         } catch (e) {
           colorValue = 0xFF3B82F6;
         }
@@ -422,7 +426,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         colorValue = data['color'];
       } else if (data['color'] is String) {
         try {
-          colorValue = int.parse(data['color']);
+          final String hexString = data['color'] as String;
+          final formatted = hexString.startsWith('#')
+              ? '0xff${hexString.substring(1)}'
+              : hexString;
+          colorValue = int.parse(formatted);
         } catch (e) {
           colorValue = 0xFF3B82F6;
         }
@@ -556,6 +564,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
       }
       
       await _loadCategories();
+
+      // Notları ve kategori renklerini güncelle
+      if (mounted) {
+        final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+        await notesProvider.refreshNotesAfterCategoryOperation();
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Hata: $e')),
@@ -721,15 +735,17 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
     
     return ReorderableListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
+      buildDefaultDragHandles: false,
       itemCount: categoryKeys.length,
       itemBuilder: (context, index) {
         final categoryName = categoryKeys[index];
         final categoryData = _categories[categoryName]!;
         return _buildReorderableCategoryCard(
-          categoryName, 
-          categoryData, 
+          categoryName,
+          categoryData,
           isDarkMode,
           key: ValueKey(categoryName),
+          index: index,
         );
       },
       onReorder: (int oldIndex, int newIndex) {
@@ -766,7 +782,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
   }
 
   // Sıralanabilir kategori kartı
-  Widget _buildReorderableCategoryCard(String name, Map<String, dynamic> data, bool isDarkMode, {required Key key}) {
+  Widget _buildReorderableCategoryCard(String name, Map<String, dynamic> data, bool isDarkMode, {required Key key, required int index}) {
     // Güvenli renk parse etme
     int colorValue = 0xFF3B82F6;
     if (data['color'] != null) {
@@ -774,7 +790,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         colorValue = data['color'];
       } else if (data['color'] is String) {
         try {
-          colorValue = int.parse(data['color']);
+          final String hexString = data['color'] as String;
+          final formatted = hexString.startsWith('#')
+              ? '0xff${hexString.substring(1)}'
+              : hexString;
+          colorValue = int.parse(formatted);
         } catch (e) {
           colorValue = 0xFF3B82F6;
         }
@@ -820,9 +840,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             if (name != 'Genel') ...[
-              Icon(
-                Icons.drag_handle,
-                color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ReorderableDragStartListener(
+                index: index,
+                child: Icon(
+                  Icons.drag_handle,
+                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
               ),
               const SizedBox(width: 8),
             ],
