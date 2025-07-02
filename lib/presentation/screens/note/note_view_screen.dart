@@ -14,10 +14,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../core/services/tts_service.dart';
 import 'package:video_player/video_player.dart';
-import '../../widgets/full_screen_image_viewer.dart';
-import '../../widgets/full_screen_video_viewer.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'add_note_screen.dart';
 import 'package:path/path.dart' as path;
 import 'package:open_filex/open_filex.dart';
@@ -208,12 +204,13 @@ class _NoteViewScreenState extends State<NoteViewScreen>
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
+                  _buildCategoryCard(isDarkMode),
                   _buildNoteHeader(isDarkMode),
                   const SizedBox(height: 24),
                   _buildNoteContent(isDarkMode),
@@ -337,6 +334,150 @@ class _NoteViewScreenState extends State<NoteViewScreen>
     );
   }
 
+  Widget _buildCategoryCard(bool isDarkMode) {
+    final hex = (_categories[_currentNote.category]?['color'] ?? '#3B82F6') as String;
+    Color dotColor;
+    try {
+      dotColor = Color(int.parse(hex.substring(1, 7), radix: 16) + 0xFF000000);
+    } catch (_) {
+      dotColor = const Color(0xFF3B82F6);
+    }
+
+    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+    final categoryKeys = _categories.keys.toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Material(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        elevation: 3,
+        shadowColor: isDarkMode
+            ? Colors.black.withOpacity(0.4)
+            : Colors.grey.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(16),
+        child: PopupMenuButton<String>(
+          onSelected: (String newCategory) {
+            if (newCategory != _currentNote.category) {
+              _confirmCategoryChange(newCategory, isDarkMode);
+            }
+          },
+          offset: const Offset(0, 8),
+          constraints: BoxConstraints(
+            minWidth: MediaQuery.of(context).size.width - 40, // Kartın genişliği
+            maxWidth: MediaQuery.of(context).size.width - 40,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+          elevation: 8,
+          shadowColor: isDarkMode
+              ? Colors.black.withOpacity(0.4)
+              : Colors.grey.withOpacity(0.25),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _currentNote.category,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Icon(Icons.expand_more_rounded, color: isDarkMode ? Colors.white : const Color(0xFF334155)),
+              ],
+            ),
+          ),
+          itemBuilder: (BuildContext context) {
+            return categoryKeys.map((String category) {
+              final hex = (_categories[category]?['color'] ?? '#3B82F6') as String;
+              Color categoryColor;
+              try {
+                categoryColor = Color(int.parse(hex.substring(1, 7), radix: 16) + 0xFF000000);
+              } catch (_) {
+                categoryColor = const Color(0xFF3B82F6);
+              }
+              
+              final count = notesProvider.allNotes.where((n) => n.category == category).length;
+              final isSelected = category == _currentNote.category;
+
+              return PopupMenuItem<String>(
+                value: category,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                        ? categoryColor.withOpacity(0.1) 
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: isSelected 
+                        ? Border.all(color: categoryColor.withOpacity(0.3))
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: categoryColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          category,
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: categoryColor.withOpacity(isDarkMode ? 0.25 : 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$count',
+                          style: TextStyle(
+                            color: categoryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.check_rounded, color: categoryColor, size: 18),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }).toList();
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildNoteHeader(bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -357,85 +498,51 @@ class _NoteViewScreenState extends State<NoteViewScreen>
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              if (_categoriesLoaded && _categories.isNotEmpty)
-                DropdownButton<String>(
-                  value: _currentNote.category,
-                  icon: const Icon(Icons.arrow_drop_down_rounded),
-                  elevation: 2,
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                  dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-                  underline: const SizedBox(),
-                  borderRadius: BorderRadius.circular(8),
-                  onChanged: (String? newValue) async {
-                    if (newValue != null && newValue != _currentNote.category) {
-                      // Notun kategorisini güncelle
-                      final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-                      final updated = await notesProvider.updateNoteCategory(_currentNote.id, newValue);
-                      if (updated) {
-                        setState(() {
-                          _currentNote = _currentNote.copyWith(category: newValue);
-                        });
-                      }
-                    }
-                  },
-                  items: _categories.keys.map<DropdownMenuItem<String>>((String key) {
-                    return DropdownMenuItem<String>(
-                      value: key,
-                      child: Text(key),
-                    );
-                  }).toList(),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B82F6).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _currentNote.category,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3B82F6),
-                    ),
-                  ),
-                ),
-              const Spacer(),
-              if (_currentNote.isPinned)
-                Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: const Icon(
-                    Icons.push_pin_rounded,
-                    size: 18,
-                    color: Color(0xFFEF4444),
-                  ),
-                ),
-              if (_currentNote.isFavorite)
-                const Icon(
-                  Icons.favorite_rounded,
-                  size: 18,
-                  color: Color(0xFFEF4444),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
+          if (_currentNote.isPinned || _currentNote.isFavorite) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (_currentNote.isPinned)
+                  const Icon(Icons.push_pin_rounded, size: 18, color: Color(0xFFEAB308)),
+                if (_currentNote.isPinned && _currentNote.isFavorite) const SizedBox(width: 4),
+                if (_currentNote.isFavorite)
+                  const Icon(Icons.favorite_rounded, size: 18, color: Color(0xFFEF4444)),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
             _currentNote.title.isNotEmpty ? _currentNote.title : 'Başlıksız Not',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
               color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
               height: 1.3,
             ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.schedule_rounded, size: 14, color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+              const SizedBox(width: 4),
+              Text(
+                _formatDate(_currentNote.createdAt),
+                style: TextStyle(fontSize: 12, color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+              ),
+              if (_currentNote.updatedAt != _currentNote.createdAt) ...[
+                const SizedBox(width: 12),
+                Icon(Icons.edit_rounded, size: 14, color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                const SizedBox(width: 4),
+                Text(
+                  _formatDate(_currentNote.updatedAt),
+                  style: TextStyle(fontSize: 12, color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                ),
+              ],
+            ],
           ),
           
           // Etiketler
@@ -464,45 +571,6 @@ class _NoteViewScreenState extends State<NoteViewScreen>
               )).toList(),
             ),
           ],
-          
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.schedule_rounded,
-                size: 16,
-                color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Oluşturulma: ${_formatDate(_currentNote.createdAt)}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
-          if (_currentNote.updatedAt != _currentNote.createdAt) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.edit_rounded,
-                  size: 16,
-                  color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Güncelleme: ${_formatDate(_currentNote.updatedAt)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -529,43 +597,29 @@ class _NoteViewScreenState extends State<NoteViewScreen>
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.description_rounded,
-                color: const Color(0xFF3B82F6),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'İçerik',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
-                ),
-              ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(
-                  _isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
-                  color: const Color(0xFF10B981),
-                ),
-                onPressed: _toggleTTS,
-                tooltip: _isSpeaking ? 'Okumayı Durdur' : 'Sesli Oku',
-              ),
-            ],
+          Text(
+            'İçerik',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+            ),
           ),
           const SizedBox(height: 16),
-          SelectableText(
-            _currentNote.content.isNotEmpty ? _currentNote.content : 'İçerik bulunmuyor',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-              height: 1.6,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              _currentNote.content,
+              style: TextStyle(
+                fontSize: 15,
+                color: isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                height: 1.6,
+              ),
+              textAlign: TextAlign.start,
             ),
           ),
         ],
@@ -677,31 +731,142 @@ class _NoteViewScreenState extends State<NoteViewScreen>
   }
 
   void _showDeleteDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notu Sil'),
-        content: const Text('Bu notu silmek istediğinizden emin misiniz?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (context) => Dialog(
+        backgroundColor: backgroundColor,
+        elevation: 8,
+        shadowColor: isDark 
+            ? Colors.black.withOpacity(0.6)
+            : Colors.grey.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: borderColor, width: 1),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark ? [
+                const Color(0xFF1E293B),
+                const Color(0xFF334155).withOpacity(0.8),
+              ] : [
+                Colors.white,
+                const Color(0xFFF8FAFC),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Dialog'u kapat
-              try {
-                final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-                await notesProvider.deleteNote(_currentNote.id);
-                _showSnackBar('Not silindi');
-                Navigator.pop(context); // Note view'ı kapat
-              } catch (e) {
-                _showSnackBar('Not silinemedi: $e', isError: true);
-              }
-            },
-            child: const Text('Sil', style: TextStyle(color: Color(0xFFEF4444))),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFEF4444).withOpacity(0.2),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.delete_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Title
+              Text(
+                'Notu Sil',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              
+              // Content
+              Text(
+                'Bu notu silmek istediğinizden emin misiniz?\n\nSilinen notlar geri getirilemez.',
+                style: TextStyle(
+                  color: secondaryText,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: secondaryText,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: borderColor),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'İptal',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(context); // Dialog'u kapat
+                        try {
+                          final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+                          await notesProvider.deleteNote(_currentNote.id);
+                          _showSnackBar('Not silindi');
+                          Navigator.pop(context); // Note view'ı kapat
+                        } catch (e) {
+                          _showSnackBar('Not silinemedi: $e', isError: true);
+                        }
+                      },
+                      child: const Text(
+                        'Sil',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1059,21 +1224,132 @@ DoguNotes ile oluşturuldu
 
   Future<void> _archiveNote() async {
     try {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+      final secondaryText = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+      final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+      final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+      
       final result = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Arşive Gönder'),
-          content: const Text('Bu notu arşive göndermek istediğinizden emin misiniz?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('İptal'),
+        barrierColor: Colors.black.withOpacity(0.4),
+        builder: (context) => Dialog(
+          backgroundColor: backgroundColor,
+          elevation: 8,
+          shadowColor: isDark 
+              ? Colors.black.withOpacity(0.6)
+              : Colors.grey.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: borderColor, width: 1),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark ? [
+                  const Color(0xFF1E293B),
+                  const Color(0xFF334155).withOpacity(0.8),
+                ] : [
+                  Colors.white,
+                  const Color(0xFFF8FAFC),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Arşive Gönder', style: TextStyle(color: Color(0xFFEF4444))),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFEF4444).withOpacity(0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.archive_rounded,
+                    color: Color(0xFFEF4444),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Title
+                Text(
+                  'Arşive Gönder',
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                
+                // Content
+                Text(
+                  'Bu notu arşive göndermek istediğinizden emin misiniz?\n\nArşivlenen notlar ana listeden kaldırılacak.',
+                  style: TextStyle(
+                    color: secondaryText,
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 28),
+                
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: secondaryText,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: borderColor),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text(
+                          'İptal',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEF4444),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text(
+                          'Arşive Gönder',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       );
 
@@ -1109,6 +1385,160 @@ DoguNotes ile oluşturuldu
       }
     } catch (e) {
       debugPrint('TTS Error: $e');
+    }
+  }
+
+  Future<void> _confirmCategoryChange(String selected, bool isDark) async {
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (context) {
+        return Dialog(
+          backgroundColor: backgroundColor,
+          elevation: 8,
+          shadowColor: isDark 
+              ? Colors.black.withOpacity(0.6)
+              : Colors.grey.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: borderColor, width: 1),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark ? [
+                  const Color(0xFF1E293B),
+                  const Color(0xFF334155).withOpacity(0.8),
+                ] : [
+                  Colors.white,
+                  const Color(0xFFF8FAFC),
+                ],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF3B82F6).withOpacity(0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.swap_horiz_rounded,
+                    color: Color(0xFF3B82F6),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Title
+                Text(
+                  'Kategoriyi Değiştir',
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                
+                // Content
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      color: secondaryText,
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Bu notun kategorisini '),
+                      TextSpan(
+                        text: '"$selected"',
+                        style: TextStyle(
+                          color: const Color(0xFF3B82F6),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const TextSpan(text: ' olarak değiştirmek istiyor musunuz?'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+                
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: secondaryText,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: borderColor),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text(
+                          'Vazgeç',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text(
+                          'Değiştir',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirm == true) {
+      final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+      final updated = await notesProvider.updateNoteCategory(_currentNote.id, selected);
+      if (updated) {
+        setState(() {
+          _currentNote = _currentNote.copyWith(category: selected);
+        });
+      }
     }
   }
 }

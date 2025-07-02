@@ -1281,13 +1281,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildViewToggle(bool isDarkMode) {
     const double itemSize = 34;
 
-    Color _iconColor(bool selected) {
+    Color iconColor(bool selected) {
       return selected
           ? const Color(0xFF3B82F6)
           : (isDarkMode ? Colors.white : const Color(0xFF334155));
     }
 
-    Widget _buildItem(IconData icon, bool gridMode) {
+    Widget buildItem(IconData icon, bool gridMode) {
       final bool isSelected = gridMode ? _isGridView : !_isGridView;
       return GestureDetector(
         onTap: () {
@@ -1306,7 +1306,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: _iconColor(isSelected), size: 20),
+          child: Icon(icon, color: iconColor(isSelected), size: 20),
         ),
       );
     }
@@ -1331,8 +1331,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildItem(Icons.grid_view_rounded, true),
-          _buildItem(Icons.view_list_rounded, false),
+          buildItem(Icons.grid_view_rounded, true),
+          buildItem(Icons.view_list_rounded, false),
         ],
       ),
     );

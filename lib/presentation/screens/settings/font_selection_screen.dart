@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/theme_provider.dart';
 
 class FontSelectionScreen extends StatefulWidget {
-  FontSelectionScreen({super.key});
+  const FontSelectionScreen({super.key});
 
   @override
   State<FontSelectionScreen> createState() => _FontSelectionScreenState();

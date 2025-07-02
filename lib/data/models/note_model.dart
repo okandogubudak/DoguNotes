@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../../domain/entities/note.dart';
+import '../../core/services/encryption_service.dart';
 
 class NoteModel extends Note {
   const NoteModel({
@@ -18,6 +19,8 @@ class NoteModel extends Note {
     super.isPinned,
     super.isArchived,
   });
+
+  static final _encService = EncryptionService.instance;
 
   @override
   NoteModel copyWith({
@@ -97,10 +100,22 @@ class NoteModel extends Note {
   }
 
   factory NoteModel.fromMap(Map<String, dynamic> map) {
+    final encService = _encService;
+    String decryptedTitle = map['title'] as String;
+    String decryptedContent = map['content'] as String;
+    try {
+      if (encService.isInitialized) {
+        decryptedTitle = encService.decrypt(decryptedTitle);
+        decryptedContent = encService.decrypt(decryptedContent);
+      }
+    } catch (_) {
+      // If decryption fails, keep raw text
+    }
+
     return NoteModel(
       id: map['id'] as String,
-      title: map['title'] as String,
-      content: map['content'] as String,
+      title: decryptedTitle,
+      content: decryptedContent,
       category: map['category'] as String,
       color: map['color'] as String,
       createdAt: DateTime.parse(map['createdAt'] as String),
@@ -120,10 +135,18 @@ class NoteModel extends Note {
   }
 
   Map<String, dynamic> toMap() {
+    final encService = _encService;
+    String encTitle = title;
+    String encContent = content;
+    if (encService.isInitialized) {
+      encTitle = encService.encrypt(title);
+      encContent = encService.encrypt(content);
+    }
+
     return {
       'id': id,
-      'title': title,
-      'content': content,
+      'title': encTitle,
+      'content': encContent,
       'category': category,
       'color': color,
       'createdAt': createdAt.toIso8601String(),

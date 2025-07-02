@@ -912,7 +912,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
   Widget _buildEditToggle(bool isDarkMode) {
     const double itemSize = 30;
 
-    Color _iconColor(bool active) => active
+    Color iconColor(bool active) => active
         ? const Color(0xFF3B82F6)
         : (isDarkMode ? Colors.white : const Color(0xFF334155));
 
@@ -937,7 +937,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen>
         child: Icon(
           _isEditMode ? Icons.edit_rounded : Icons.edit_off_rounded,
           size: itemSize - 6,
-          color: _iconColor(_isEditMode),
+          color: iconColor(_isEditMode),
         ),
       ),
     );

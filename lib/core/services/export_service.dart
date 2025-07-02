@@ -12,7 +12,6 @@ import '../../data/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ExportService {
   static final ExportService _instance = ExportService._internal();

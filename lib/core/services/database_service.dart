@@ -198,15 +198,14 @@ class DatabaseService {
 
   // Search notes
   Future<List<NoteModel>> searchNotes(String query) async {
-    final db = await database;
     try {
-      final List<Map<String, dynamic>> maps = await db.query(
-        'notes',
-        where: '(title LIKE ? OR content LIKE ?) AND isArchived = ?',
-        whereArgs: ['%$query%', '%$query%', 0],
-        orderBy: 'isPinned DESC, updatedAt DESC',
-      );
-      return List.generate(maps.length, (i) => NoteModel.fromMap(maps[i]));
+      // Şifrelenmiş veride LIKE sorgusu çalışmayacağından, tüm notları
+      // çekip bellek içinde filtreleme yapıyoruz.
+      final notes = await getAllNotes();
+      final lower = query.toLowerCase();
+      return notes.where((note) =>
+          note.title.toLowerCase().contains(lower) ||
+          note.content.toLowerCase().contains(lower)).toList();
     } catch (e) {
       print('Error searching notes: $e');
       return [];

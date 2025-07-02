@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,9 +9,7 @@ import '../../providers/notes_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/audio_recorder_widget.dart';
 import '../../widgets/media_attachment_widget.dart';
-import '../../../domain/entities/note.dart';
 import '../../../core/services/speech_to_text_service.dart';
-import '../../../core/services/image_compression_service.dart';
 import '../../../core/services/media_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;

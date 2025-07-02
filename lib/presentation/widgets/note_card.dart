@@ -64,7 +64,7 @@ class NoteCard extends StatelessWidget {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16), // İç boşluk
+                padding: const EdgeInsets.all(4), // İç boşluk
                 child: Column( // Dikey sıralama
                   children: [
                     // BAŞLIK BÖLÜMÜ - En üstte, merkezi
@@ -72,18 +72,29 @@ class NoteCard extends StatelessWidget {
                       height: 30, // Başlık alanının yüksekliği
                       child: Stack( // Üst üste yerleştirme için
                         children: [
-                          // Başlık metni - Her zaman merkezi
+                          // Başlık metni - Her zaman merkezi, otomatik boyut ayarlama
                           Center(
-                            child: Text(
-                              note.title.isNotEmpty ? note.title : 'Başlıksız Not',
-                              textAlign: TextAlign.center, // Merkezi hizalama
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold, // Kalın yazı
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 16,
-                              ),
-                              maxLines: 1, // Tek satır
-                              overflow: TextOverflow.ellipsis, // Uzun başlıkları "..." ile kes
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final maxWidth = constraints.maxWidth - 40; // Pin/favorite ikonları için yer bırak
+                                return Container(
+                                  constraints: BoxConstraints(maxWidth: maxWidth),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown, // Yazıyı küçült, büyütme
+                                    child: Text(
+                                      note.title.isNotEmpty ? note.title : 'Başlıksız Not',
+                                      textAlign: TextAlign.center, // Merkezi hizalama
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold, // Kalın yazı
+                                        color: isDarkMode ? Colors.white : Colors.black,
+                                        fontSize: isGridView ? 16 : 15, // Grid/List için farklı varsayılan boyut
+                                      ),
+                                      maxLines: 1, // Tek satır
+                                      overflow: TextOverflow.ellipsis, // Uzun başlıkları "..." ile kes
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           // Pin ve Favori simgeleri - Sağ tarafta
@@ -119,27 +130,28 @@ class NoteCard extends StatelessWidget {
                     
                     // İÇERİK BÖLÜMÜ - Defter çizgileri ile
                     Expanded( // Kalan alanı kapla
-                      child: Container(
+                      child: SizedBox(
                         width: double.infinity, // Tam genişlik
                         child: CustomPaint( // Özel çizim (defter çizgileri)
                           painter: NotebookLinesPainter( // Çizgi çizen sınıf
                             isDarkMode: isDarkMode,
+                            isGridView: isGridView,
                           ),
                           child: Container(
-                            padding: const EdgeInsets.only(left: 4, right: 4, top: 0), // İçerik padding'i
+                            padding: const EdgeInsets.only(left: 6, right: 6, top: 2),
                             child: Text(
-                              note.content.isNotEmpty ? note.content : '', // Not içeriği
+                              note.content.isNotEmpty ? note.content : '',
                               style: TextStyle(
                                 color: isDarkMode
-                                    ? Colors.white.withOpacity(0.9) // Koyu temada beyaz
-                                    : Colors.black87, // Açık temada siyah
-                                fontSize: 13, // Yazı boyutu
-                                height: 1.8, // Satır yüksekliği - defter çizgileri ile uyumlu
-                                letterSpacing: 0.5, // Yazı aralığı
-                                fontWeight: FontWeight.w400, // Normal kalınlık
+                                    ? Colors.white.withOpacity(0.9)
+                                    : Colors.black87,
+                                fontSize: 13,
+                                height: 1.8,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w400,
                               ),
-                              maxLines: 5, // Maksimum 5 satır
-                              overflow: TextOverflow.ellipsis, // Uzun metinleri "..." ile kes
+                              maxLines: isGridView ? 3 : 6,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -150,7 +162,7 @@ class NoteCard extends StatelessWidget {
                     
                     // FOOTER BÖLÜMÜ - Tarih merkezi, medya simgeleri solda
                     SizedBox(
-                      height: 10, // Footer yüksekliği
+                      height: 25, // Footer yüksekliği
                       child: Stack( // Üst üste yerleştirme
                         children: [
                           // Tarih - Her zaman merkezi
@@ -159,7 +171,7 @@ class NoteCard extends StatelessWidget {
                               _formatDate(note.updatedAt), // Tarihi formatla
                               style: TextStyle(
                                 color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.5), // Yarı opak
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w400,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -215,41 +227,61 @@ class NoteCard extends StatelessWidget {
 
   // Tarihi okunabilir formata çevir
   String _formatDate(DateTime date) {
-    return DateFormat('dd.MM.yyyy HH:mm').format(date); // Gün.Ay.Yıl Saat:Dakika
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      if (difference.inHours == 0) {
+        if (difference.inMinutes == 0) {
+          return 'Şimdi';
+        }
+        return '${difference.inMinutes} dakika önce';
+      }
+      return '${difference.inHours} saat önce';
+    } else if (difference.inDays == 1) {
+      return 'Dün';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} gün önce';
+    } else {
+      return DateFormat('dd/MM/yyyy').format(date);
+    }
   }
 }
 
 // Defter çizgilerini çizen özel sınıf
 class NotebookLinesPainter extends CustomPainter {
   final bool isDarkMode; // Tema bilgisi
+  final bool isGridView; // Grid/List görünüm bilgisi
 
   NotebookLinesPainter({
     required this.isDarkMode,
+    required this.isGridView,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint() // Çizgi çizme ayarları
-      ..color = (isDarkMode ? Colors.white : Colors.grey.shade400).withOpacity(0.25) // Çizgi rengi
-      ..strokeWidth = 0.5 // Çizgi kalınlığı
+      ..color = (isDarkMode ? Colors.white : Colors.grey.shade300).withOpacity(0.3) // Çizgi rengi
+      ..strokeWidth = 0.7 // Çizgi kalınlığı
       ..style = PaintingStyle.stroke; // Çizgi stili
 
     // Yazı ile çizgilerin uyumlu olması için hesaplamalar - Gerçek defter gibi
     const double fontSize = 13.0; // Yazı boyutu
-    const double lineHeight = 1.5; // Satır yükseklik çarpanı
-    const double lineSpacing = fontSize * lineHeight; // Satırlar arası mesafe (23.4px)
-    const double textTopPadding = 3.0; // Container'daki top padding
-    const double baselineOffset = fontSize ; // Yazının baseline'ı (yazının oturduğu çizgi)
+    const double lineHeight = 1.8; // Satır yükseklik çarpanı (text style ile aynı)
+    const double lineSpacing = fontSize * lineHeight; // Satırlar arası mesafe
+    const double textTopPadding = 2.0; // Container'daki top padding ile uyumlu
+    const double baselineOffset = fontSize * 1.82; // Çizgiyi yazının altına koymak için
     
-    // 5 yatay çizgi çiz - yazıların baseline'ında (oturduğu çizgide)
-    for (int i = 0; i < 5; i++) {
-      // Her satırın baseline'ını hesapla (yazının oturduğu nokta)
+    // Grid için 3, List için 6 yatay çizgi çiz - yazıların altında (gerçek defter gibi)
+    final lineCount = isGridView ? 3 : 6;
+    for (int i = 0; i < lineCount; i++) {
+      // Her satırın altındaki çizgiyi hesapla (yazının altına çizgi)
       final lineY = textTopPadding + baselineOffset + (i * lineSpacing);
       
-      if (lineY < size.height - 5) { // Alan içinde kalırsa çiz
+      if (lineY < size.height - 2) { // Alan içinde kalırsa çiz
         canvas.drawLine(
-          Offset(4, lineY), // Başlangıç noktası (soldan 4px)
-          Offset(size.width - 4, lineY), // Bitiş noktası (sağdan 4px)
+          Offset(6, lineY), // Başlangıç noktası (soldan 6px)
+          Offset(size.width - 6, lineY), // Bitiş noktası (sağdan 6px)
           paint, // Çizgi ayarları
         );
       }
@@ -258,4 +290,4 @@ class NotebookLinesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false; // Yeniden çizilsin mi?
-} 
+}

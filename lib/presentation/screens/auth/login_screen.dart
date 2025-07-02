@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/encryption_service.dart';
 import '../../providers/theme_provider.dart';
 import '../home/home_screen.dart';
 import 'pin_setup_screen.dart';
@@ -128,6 +129,8 @@ class _LoginScreenState extends State<LoginScreen>
       final isValid = await authService.verifyPin(enteredPinString);
 
       if (isValid) {
+        // Initialize encryption service with user PIN
+        EncryptionService.instance.initializeFromPin(enteredPinString);
         HapticFeedback.mediumImpact();
         if (mounted) {
           Navigator.of(context).pushReplacement(

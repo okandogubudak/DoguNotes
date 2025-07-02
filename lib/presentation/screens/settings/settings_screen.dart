@@ -803,7 +803,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               );
-            }).toList(),
+            }),
             const SizedBox(height: 8),
           ] else
             Padding(

@@ -29,7 +29,6 @@ class _MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlayingAudio = false;
   String? _currentPlayingPath;
-  bool _isEditMode = false;
 
   @override
   void dispose() {
@@ -153,19 +152,6 @@ class _MediaAttachmentWidgetState extends State<MediaAttachmentWidget> {
                   ),
                 ),
               ),
-              if (totalAttachments > 0)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isEditMode = !_isEditMode;
-                    });
-                  },
-                  icon: Icon(
-                    _isEditMode ? Icons.done : Icons.edit,
-                    color: theme.colorScheme.primary,
-                  ),
-                  tooltip: _isEditMode ? 'Düzenlemeyi bitir' : 'Düzenle',
-                ),
             ],
           ),
           

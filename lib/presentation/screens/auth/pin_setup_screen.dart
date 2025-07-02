@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/encryption_service.dart';
 import '../../providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import '../home/home_screen.dart';
@@ -61,6 +62,8 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
 
     try {
       await _authService.setPinCode(_pinController.text);
+      // Initialize encryption service with new PIN
+      EncryptionService.instance.initializeFromPin(_pinController.text);
       
       if (mounted) {
         Navigator.of(context).pushReplacement(
